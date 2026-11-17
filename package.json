@@ -1,0 +1,22 @@
+{
+  "name": "worknote",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "description": "Markdown-first, self-hosted work journal and project task manager",
+  "engines": { "node": ">=22.12.0" },
+  "scripts": {
+    "setup": "npm --prefix server ci && npm --prefix client ci",
+    "build": "npm --prefix server run build && npm --prefix client run build",
+    "init": "node scripts/init.mjs",
+    "start": "node server/dist/index.js",
+    "dev:api": "npm --prefix server run dev",
+    "dev:web": "npm --prefix client run dev",
+    "test": "npm --prefix server test && node --test test/*.test.mjs",
+    "check": "node client/node_modules/typescript/bin/tsc --noEmit --incremental false -p client/tsconfig.json",
+    "query": "node server/dist/query.js",
+    "record": "node server/dist/record.js",
+    "digest": "node server/dist/digest.js",
+    "agent": "node server/dist/agent.js"
+  }
+}

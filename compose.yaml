@@ -1,0 +1,23 @@
+services:
+  worknote:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      HOST: 0.0.0.0
+      PORT: "8000"
+      WORKNOTE_ROOT: /data
+      WORKNOTE_ENV_FILE: ""
+      WORKNOTE_SYSTEMD: "0"
+      WORKNOTE_GIT_SNAPSHOT: "0"
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - worknote-data:/data
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+volumes:
+  worknote-data:

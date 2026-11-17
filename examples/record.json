@@ -1,0 +1,26 @@
+{
+  "project": "example",
+  "date": "2026-01-15",
+  "system": "演示系统",
+  "summary": "整理演示需求并安排后续验证。",
+  "entries": [
+    {
+      "time": "09:00",
+      "title": "整理演示需求",
+      "type": "需求",
+      "module": "入门示例",
+      "content": "确认演示页面需要补充操作提示。",
+      "todoNote": "补充演示页面的操作提示"
+    }
+  ],
+  "todos": [
+    {
+      "name": "补充演示页面的操作提示",
+      "note": "添加一段简短说明并验证展示效果。",
+      "type": "需求",
+      "priority": "中",
+      "progress": 0,
+      "entryIndex": 0
+    }
+  ]
+}

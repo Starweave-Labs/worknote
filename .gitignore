@@ -1,0 +1,44 @@
+# Application data is private. Keep backups in a separate private repository.
+/data/
+/projects/
+/projects.json
+/todo.md
+/index.md
+/inbox.md
+/inbox/
+/agent/
+shares.json
+site-config.json
+ai-config.json
+
+# Credentials and local environment
+.env
+.env.*
+!.env.example
+*.env
+*.pem
+*.key
+*.jks
+*.keystore
+
+# Dependencies and generated output
+node_modules/
+server/dist/
+public/app/
+client/dist/
+*.tsbuildinfo
+.cache/
+coverage/
+
+# Local tools, logs, backups
+.zcode/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.bak
+.backup/
+*.apk
+*.tar.gz

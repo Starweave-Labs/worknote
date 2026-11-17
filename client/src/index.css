@@ -1,0 +1,128 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+  body {
+    @apply m-0 bg-canvas font-sans text-[15px] leading-[1.7] text-ink antialiased;
+  }
+  a {
+    @apply text-accent no-underline hover:text-accent-hover hover:underline;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-semibold;
+  }
+}
+
+@layer components {
+  /* ---- 设计系统(全站统一):字阶 24/15/13.5/12;辅助文字用 ink-2,避免灰字噪音 ---- */
+
+  /* 区块小标题:中性、字距略开 */
+  .section-title {
+    @apply my-0 mb-3.5 mt-10 text-[13.5px] font-semibold uppercase tracking-[0.6px] text-ink-2;
+  }
+
+  /* 卡片:surface 分层 + 极淡悬浮阴影(TodoKanban 同语言) */
+  .card {
+    @apply rounded-card border border-line bg-surface p-[22px] px-6 shadow-2xs transition-shadow duration-150;
+  }
+
+  /* 概览条:从裸线条升级为卡片内分栏 */
+  .metabar {
+    @apply mt-[22px] flex flex-wrap items-stretch rounded-card border border-line bg-surface px-5 shadow-2xs;
+  }
+  .metabar-cell {
+    @apply flex flex-1 flex-col gap-1 py-4 pr-5;
+  }
+  .metabar-cell + .metabar-cell {
+    @apply border-l border-line-soft pl-5;
+  }
+
+  /* 按钮体系:primary / secondary / ghost 三档,统一 34px 高、6px 圆角、150ms */
+  .btn {
+    @apply inline-flex h-[34px] items-center justify-center gap-1.5 rounded-md px-3.5 text-[13px] font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply inline-flex h-[34px] items-center justify-center gap-1.5 rounded-md px-3.5 text-[13px] font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-50 bg-accent text-white shadow-2xs hover:bg-accent-hover hover:shadow-sm;
+  }
+  .btn-secondary {
+    @apply inline-flex h-[34px] items-center justify-center gap-1.5 rounded-md px-3.5 text-[13px] font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-50 border border-line bg-surface text-ink-2 shadow-2xs hover:border-accent/40 hover:text-accent hover:shadow-sm;
+  }
+  .btn-ghost {
+    @apply inline-flex h-[34px] items-center justify-center gap-1.5 rounded-md px-3.5 text-[13px] font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-50 text-ink-2 hover:bg-line-soft hover:text-ink;
+  }
+
+  /* 输入框体系(含 select/textarea 复用) */
+  .input {
+    @apply w-full rounded-md border border-line bg-surface px-3 text-[13.5px] text-ink shadow-2xs outline-none transition-all duration-150 placeholder:text-ink-muted/80 focus:border-accent focus:shadow-sm;
+    height: 34px;
+  }
+  textarea.input {
+    height: auto;
+    @apply py-2 leading-[1.7];
+  }
+
+  /* 待办进度:原生 range,细轨道与足够大的触控区域。 */
+  .todo-progress-range {
+    @apply h-7 w-full cursor-pointer appearance-none rounded-md bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-50;
+    touch-action: pan-y;
+  }
+  .todo-progress-range::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(to right, theme('colors.t2') var(--todo-progress), theme('colors.line.soft') var(--todo-progress));
+  }
+  .todo-progress-range::-moz-range-track {
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(to right, theme('colors.t2') var(--todo-progress), theme('colors.line.soft') var(--todo-progress));
+  }
+  .todo-progress-range::-webkit-slider-thumb {
+    @apply h-3.5 w-3.5 appearance-none rounded-full border-2 border-accent bg-surface;
+    margin-top: -4px;
+  }
+  .todo-progress-range::-moz-range-thumb {
+    @apply h-3.5 w-3.5 rounded-full border-2 border-accent bg-surface;
+    box-sizing: border-box;
+  }
+
+  /* 标签基座:统一 20px 视觉高、11px 字号 */
+  .tag {
+    @apply inline-flex items-center gap-1 whitespace-nowrap rounded border px-1.5 py-px text-[11px] leading-[1.6] transition-colors duration-150;
+  }
+}
+
+/* 附件图片网格的缩放与提示 */
+.img-cell img {
+  transition: border-color 0.14s ease;
+}
+.img-cell:hover img {
+  border-color: #24557f;
+}
+/* 汇报页 Markdown 正文(后端 marked 渲染,自带轻量排版) */
+.report-body h1 {
+  @apply m-0 mb-1 text-[20px] font-semibold tracking-[-0.2px];
+}
+.report-body h2 {
+  @apply m-0 mt-5 mb-2 border-b border-line-soft pb-1.5 text-[15.5px] font-semibold;
+}
+.report-body h3 {
+  @apply m-0 mt-4 mb-1.5 text-[14px] font-medium;
+}
+.report-body p {
+  @apply m-0 my-2 text-[13.5px] leading-[1.8];
+}
+.report-body ul {
+  @apply my-2 list-disc pl-5;
+}
+.report-body li {
+  @apply my-1 text-[13.5px] leading-[1.8];
+}
+.report-body strong {
+  @apply font-semibold;
+}
