@@ -22,10 +22,13 @@ jobs:
       - run: npm run check
       - run: npm --prefix server audit --omit=dev --audit-level=high
       - run: npm --prefix client audit --audit-level=high
-      - run: npm run record -- check --json
+      - name: Validate an initialized empty data root
+        run: |
+          npm run init -- --no-env
+          npm run record -- check --json
         env:
           WORKNOTE_ENV_FILE: ""
-          WORKNOTE_ROOT: /tmp/worknote-ci-empty
+          WORKNOTE_ROOT: ${{ runner.temp }}/worknote-ci-empty
   container:
     runs-on: ubuntu-latest
     steps:

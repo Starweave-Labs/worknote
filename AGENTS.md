@@ -127,6 +127,6 @@ Agent默认off；L1/dry只提出记录写入建议但仍会有AI调用与本地�
 - Node22.12+，React18、Vite8、Tailwind3、HeadlessUI2，Fastify5、TypeScript。新增代码匹配周围命名与注释密度。
 - UI使用一个accent主色与中性灰、类型同色相t1–t4；danger仅逾期。复用 `client/src/index.css` 的 `.btn-*`、`.input`、`.tag`、`.card` 等。
 - `npm run setup` → `npm run build`；写Markdown无需构建，改前端/后端需构建并重启相应进程。
-- `npm test`、`npm run check`、`npm run build`，只使用隔离夹具；不运行生产Agent、不发真实通知。
+- `npm test`、`npm run check`、`npm run build`，只使用隔离夹具；不运行生产Agent、不发真实通知。CI 的记录校验必须先对临时数据根运行 `npm run init -- --no-env`，再执行 `record check`，不使用生产目录。
 - 页面变更需真实浏览器点击/截图验证登录、项目选择、待办状态、分享、深链。只有HTTP200或类型通过不算交互验收；工具缺失要如实报告。
 - 发布前按源码白名单检查实际git文件和初始历史。真实工作库保留私有，不把其.git复制到开源目录。

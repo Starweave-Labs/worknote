@@ -26,7 +26,7 @@ React SPA → 同源 /api、/attachments → Fastify 单进程
 | `.env.example` | 登录、数据根、监听、AI、通知与自动化选项，不含真实凭据 |
 | `Dockerfile` / `compose.yaml` | 多阶段构建、非root单进程、独立数据卷 |
 | `examples/` | 完全虚构项目与record add演示 |
-| `.github/workflows/ci.yml` | Node构建/单测/类型/依赖审查与容器构建 |
+| `.github/workflows/ci.yml` | Node构建/单测/类型/依赖审查、初始化临时空数据根后格式校验与容器构建 |
 | `test/init.test.mjs` | 初始化与保留已有数据测试 |
 
 ## 后端模块
