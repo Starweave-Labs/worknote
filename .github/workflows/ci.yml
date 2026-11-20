@@ -34,3 +34,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: docker build -t worknote:ci .
+      - name: Validate container initialization and bundled examples
+        run: |
+          docker run --rm -e WORKNOTE_PASSWORD=ci-fixture-password -e WORKNOTE_SECRET=ci-fixture-session-secret worknote:ci sh -c '
+            npm run init -- --no-env --project example --name "示例项目" --system "演示系统" &&
+            npm run record -- add --file examples/record.json &&
+            npm run record -- check --json
+          '

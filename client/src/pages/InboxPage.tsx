@@ -27,30 +27,36 @@ export function InboxPage() {
     (async () => {
       if (!("caches" in window)) return;
       const names = (await caches.keys()).filter((n) => n.startsWith("share-target-"));
+      let pending = false;
       for (const name of names) {
         try {
           const cache = await caches.open(name);
           const metaRes = await cache.match("meta");
           const countRes = await cache.match("count");
-          if (!metaRes || !countRes) continue;
+          if (!metaRes || !countRes) throw new Error("分享内容尚未完整保存，请稍后刷新重试");
           const meta = (await metaRes.json()) as { title?: string; text?: string };
-          const count = Number(await countRes.text()) || 0;
+          const count = Number(await countRes.text());
+          if (!Number.isInteger(count) || count < 0 || count > 6) {
+            throw new Error("分享图片数量无效，缓存已保留");
+          }
           const shared = [meta.text, meta.title].filter(Boolean).join("\n").trim();
-          if (shared) setText((t) => (t ? `${t}\n${shared}` : shared));
           const files: File[] = [];
           for (let i = 0; i < count; i++) {
             const res = await cache.match(`img-${i}`);
-            if (!res) continue;
+            if (!res) throw new Error("分享图片尚未完整保存，请稍后刷新重试");
             const blob = await res.blob();
             files.push(new File([blob], `分享截图${i + 1}.png`, { type: blob.type || "image/png" }));
           }
           if (files.length) await picker.addFiles(files);
-        } finally {
+          if (shared) setText((t) => (t ? `${t}\n${shared}` : shared));
           await caches.delete(name);
+        } catch (err) {
+          pending = true;
+          setSaveErr(err instanceof Error ? err.message : String(err));
         }
       }
-      window.history.replaceState({}, "", "/inbox");
-    })();
+      if (!pending) window.history.replaceState({}, "", "/inbox");
+    })().catch((err) => setSaveErr(err instanceof Error ? err.message : String(err)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

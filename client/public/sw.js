@@ -19,15 +19,16 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
   if (event.request.method === "POST" && url.pathname === "/share-target") {
-    event.respondWith(Response.redirect("/inbox?shared=1", 303));
-    event.waitUntil(handleShare(event.request));
+    event.respondWith(handleShare(event.request));
   }
 });
 
 async function handleShare(request) {
+  let cacheName;
   try {
     const data = await request.formData();
-    const cache = await caches.open(SHARED_PREFIX + Date.now());
+    cacheName = SHARED_PREFIX + Date.now() + "-" + crypto.randomUUID();
+    const cache = await caches.open(cacheName);
     const meta = {
       title: String(data.get("title") || ""),
       text: String(data.get("text") || ""),
@@ -49,8 +50,21 @@ async function handleShare(request) {
         i += 1;
       }
     }
+    // count 最后写入,作为完整缓存的就绪标记;全部成功后才允许页面读取。
     await cache.put("count", new Response(String(i)));
+    return Response.redirect(new URL("/inbox?shared=1", request.url).href, 303);
   } catch (e) {
+    if (cacheName) {
+      try {
+        await caches.delete(cacheName);
+      } catch (cleanupError) {
+        console.error("share target 清理失败", cleanupError);
+      }
+    }
     console.error("share target 处理失败", e);
+    return new Response("分享失败，内容未保存。请返回后重试。", {
+      status: 500,
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    });
   }
 }

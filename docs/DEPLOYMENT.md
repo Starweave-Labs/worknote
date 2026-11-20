@@ -99,7 +99,7 @@ npm run agent -- --level L1 --dry
 npm run agent -- --level L2
 ```
 
-页面「立即运行」只有显式开启 systemd 且配置自己的服务时可用。普通 CLI 不依赖页面控制。
+页面「立即运行」只有显式开启 systemd 且配置自己的服务时可用。普通 CLI 不依赖页面控制。默认 Docker 镜像不含 Git，Compose 也明确关闭快照与 systemd；L2 请使用安装了 Git 的 Node 部署，或自行扩展镜像并配置私有数据仓库，不要仅修改环境开关就认为已启用。
 
 ## 7. 备份、更新与恢复
 

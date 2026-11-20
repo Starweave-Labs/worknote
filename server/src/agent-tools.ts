@@ -240,7 +240,7 @@ function toolSummarizeDay(args: Record<string, unknown>): ToolResult {
   }
 }
 
-/** 把「## 未完成」区里的 - [x] 块物理挪到「## 已完成」区首部(内容不变)。 */
+/** 把「## 未完成」区里的 - [x] 块连同原分组挪到「## 已完成」区(内容不变)。 */
 function toolMoveDoneArchived(): ToolResult {
   const file = join(ROOT, "todo.md");
   const lines = readFileSync(file, "utf-8").replace(/\r\n/g, "\n").split("\n");
@@ -254,28 +254,42 @@ function toolMoveDoneArchived(): ToolResult {
   if (openIdx < 0 || doneIdx < 0 || openIdx > doneIdx) {
     return { ok: false, risk: "green", summary: "todo.md 分区异常" };
   }
-  // 在未完成区收集 [x] 主行 + 其缩进子块
-  const toMove: string[][] = [];
+  // 在未完成区收集原分组、[x] 主行及其缩进子块。
+  const toMove: { group: string; block: string[] }[] = [];
   const remove: number[] = [];
+  let group = "";
   for (let i = openIdx + 1; i < doneIdx; i++) {
     const t = lines[i].trim();
-    if (t.startsWith("### ")) continue;
+    if (t.startsWith("### ")) {
+      group = t.slice(4).trim();
+      continue;
+    }
     const m = t.match(/^-\s*\[x\]\s+/);
     if (m) {
+      // 无分组的来源项进入已完成区会触发来源推导,无法无损保留原归属。
+      if (!group && parseTodoLine(lines[i])?.source) {
+        return { ok: false, risk: "green", summary: "已完成条目有来源但缺少原分组,请补充分组后归档" };
+      }
       const block = [lines[i]];
       let j = i + 1;
       for (; j < doneIdx && isIndented(lines[j]); j++) block.push(lines[j]);
-      toMove.push(block);
+      toMove.push({ group, block });
       remove.push(i, ...Array.from({ length: j - i - 1 }, (_, k) => i + 1 + k));
       i = j - 1;
     }
   }
   if (!toMove.length) return { ok: true, risk: "green", summary: "未完成区没有物理滞留的已完成条目" };
   const next = lines.filter((_, idx) => !remove.includes(idx));
-  // 重新定位已完成区,把块插到该节标题后(完成倒序=最新在前:按原出现顺序倒插)
   const doneAt = next.findIndex((l) => l.trim().startsWith("## 已完成"));
-  const insert = toMove.reverse().flatMap((b) => [...b, ""]);
-  next.splice(doneAt + 1, 0, ...insert, "");
+  // 混排前缀依赖空分组/来源推导,不能让新增分组覆盖它;在首个原分组前插入,
+  // 若全节混排则追加到末尾。原有显式分组会隔离新块,避免改动任何旧条目归属。
+  const firstGroup = next.findIndex((l, i) => i > doneAt && !isIndented(l) && l.trim().startsWith("### "));
+  const reversed = toMove.reverse();
+  const grouped = reversed.filter((b) => b.group).flatMap((b) => [`### ${b.group}`, "", ...b.block, ""]);
+  if (grouped.length) next.splice(firstGroup < 0 ? next.length : firstGroup, 0, ...grouped);
+  // 无来源、无分组的历史项保持在已完成节首,不能继承任一项目分组。
+  const ungrouped = reversed.filter((b) => !b.group).flatMap((b) => [...b.block, ""]);
+  if (ungrouped.length) next.splice(doneAt + 1, 0, ...ungrouped, "");
   atomicWrite(file, next.join("\n"));
   return { ok: true, risk: "green", summary: `已把 ${toMove.length} 条已完成条目挪入「已完成」区` };
 }

@@ -9,6 +9,7 @@
 import { existsSync, readFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { atomicWrite } from "./todo-write.js";
+import { updateDayIndex } from "./day-index.js";
 
 const COLON = "\uFF1A";
 
@@ -64,6 +65,7 @@ export function appendDayCompletion(root: string, slug: string, input: DayEntryI
       entry +
       `---\n`;
     atomicWrite(file, tpl);
+    updateDayIndex(root, slug, pName || slug, sName, input.date);
     return;
   }
 
@@ -74,6 +76,10 @@ export function appendDayCompletion(root: string, slug: string, input: DayEntryI
   const body = hadSep ? trimmed.replace(/\n---\s*$/, "\n") : trimmed;
   const prefix = body.endsWith("\n\n") ? body : (body.endsWith("\n") ? `${body}\n` : `${body}\n\n`);
   atomicWrite(file, `${prefix}${entry}---\n`);
+  const project = input.projectName || text.match(/^-\s*\*\*项目\*\*：(.+)$/m)?.[1]?.trim() || slug;
+  const system = input.systemName || text.match(/^-\s*\*\*系统\*\*：(.+)$/m)?.[1]?.trim() || "";
+  const summary = text.match(/^>\s*概要：(.+)$/m)?.[1]?.trim();
+  updateDayIndex(root, slug, project, system, input.date, summary);
 }
 
 function buildEntry(input: DayEntryInput): string {

@@ -21,7 +21,7 @@ WorkNote/
 │   │   ├── render-markdown.ts      # marked + HTML净化
 │   │   ├── todo-format.ts          # 权威待办格式/进度/缩进子块
 │   │   ├── todo-write.ts / todo-create.ts
-│   │   ├── daylog-write.ts / attachments-write.ts / thumbnail.ts
+│   │   ├── daylog-write.ts / day-index.ts / attachments-write.ts / thumbnail.ts
 │   │   ├── auth.ts / shares.ts / site-config.ts
 │   │   ├── ai.ts / notify.ts / inbox.ts / modules.ts / report.ts
 │   │   ├── query.ts / record.ts / digest.ts
@@ -61,7 +61,7 @@ npm run record -- done "事项名" --note "完成说明"
 npm run query -- --project example --todo --status open
 ```
 
-`add` 一次处理当日条目、原附件、索引和待办；`done`同步完成标记、说明和当日日记录；写后校验。去重/回顾用 query 的结构化过滤，而不是裸grep业务正文。概要可显式使用AI `record summary`，未配置不调用。
+`add` 一次处理当日条目、原附件、索引和待办；`done`同步完成标记、说明和当日日记录；网页完成、进度首次到100与CLI共用 `day-index.ts` 同步索引，保留已有概要且不重复登记；写后校验。去重/回顾用 query 的结构化过滤，而不是裸grep业务正文。概要可显式使用AI `record summary`，未配置不调用。
 
 每日模板：
 
@@ -118,7 +118,7 @@ npm run query -- --project example --todo --status open
 
 AI、Webhook默认为空。只有主动配置/使用后发送工作内容到用户指定服务；不得暗中发送或用真实内容测试外部接口。
 
-Agent默认off；L1/dry只提出记录写入建议但仍会有AI调用与本地运行日志。L2需显式允许数据快照、独立私有数据Git仓库和成功快照后才执行绿色操作。黄色转人工，红色不提供工具。失败只恢复该数据仓库明确路径，不回退源码库。
+Agent默认off；整理已完成待办时必须保留其显式项目/系统分组，不能按旧来源覆盖迁移后的归属，也不能改变原已完成项的归属。L1/dry只提出记录写入建议但仍会有AI调用与本地运行日志。L2需显式允许数据快照、独立私有数据Git仓库和成功快照后才执行绿色操作。黄色转人工，红色不提供工具。失败只恢复该数据仓库明确路径，不回退源码库。
 
 `WORKNOTE_SYSTEMD=1`才允许页面操作固定单元，默认保存晨报时间只写配置并说明需外部调度；不要碰当前主机已有的生产systemd服务。`WORKNOTE_GIT_SNAPSHOT=1`才快照，限定数据根自身.git和数据路径，不add整个源码、不push。
 
@@ -128,5 +128,6 @@ Agent默认off；L1/dry只提出记录写入建议但仍会有AI调用与本地�
 - UI使用一个accent主色与中性灰、类型同色相t1–t4；danger仅逾期。复用 `client/src/index.css` 的 `.btn-*`、`.input`、`.tag`、`.card` 等。
 - `npm run setup` → `npm run build`；写Markdown无需构建，改前端/后端需构建并重启相应进程。
 - `npm test`、`npm run check`、`npm run build`，只使用隔离夹具；不运行生产Agent、不发真实通知。CI 的记录校验必须先对临时数据根运行 `npm run init -- --no-env`，再执行 `record check`，不使用生产目录。
+- PWA系统分享必须等文字、全部图片及就绪标记写完缓存后才跳转；页面完整读取并填入表单成功后才能删除缓存，失败时保留并提示重试。
 - 页面变更需真实浏览器点击/截图验证登录、项目选择、待办状态、分享、深链。只有HTTP200或类型通过不算交互验收；工具缺失要如实报告。
 - 发布前按源码白名单检查实际git文件和初始历史。真实工作库保留私有，不把其.git复制到开源目录。

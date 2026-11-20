@@ -27,7 +27,7 @@ React SPA → 同源 /api、/attachments → Fastify 单进程
 | `Dockerfile` / `compose.yaml` | 多阶段构建、非root单进程、独立数据卷 |
 | `examples/` | 完全虚构项目与record add演示 |
 | `.github/workflows/ci.yml` | Node构建/单测/类型/依赖审查、初始化临时空数据根后格式校验与容器构建 |
-| `test/init.test.mjs` | 初始化与保留已有数据测试 |
+| `test/init.test.mjs` / `test/pwa-share.test.mjs` | 初始化保留已有数据、PWA分享缓存完成后跳转及失败回滚测试 |
 
 ## 后端模块
 
@@ -41,7 +41,7 @@ React SPA → 同源 /api、/attachments → Fastify 单进程
 | `todo-format.ts` | 全角分隔符、主行/子块读写、合法progress与完成标记权威格式 |
 | `todo-create.ts` | 新建按项目/系统分组末尾落位 |
 | `todo-write.ts` | 完成/取消/进度/编辑/删除/反馈/回复，原子最小改动，保留子块 |
-| `daylog-write.ts` | 完成首次进入100时追加当日日记录，支持无记录项目 |
+| `daylog-write.ts` / `day-index.ts` | 完成首次进入100时追加当日日记录并同步索引；CLI与网页共用索引排序/去重/概要保留 |
 | `attachments-write.ts` | 原图解码校验与保存（6图、单图8MiB），644/755 |
 | `thumbnail.ts` | sharp WebP缩略图与私有缓存，原图不变 |
 | `auth.ts` | 单口令HMAC会话、Secure缺省、失败IP限流 |
@@ -55,7 +55,7 @@ React SPA → 同源 /api、/attachments → Fastify 单进程
 | `query.ts` | 多关键词AND、项目/日期/类型/模块/状态结构化检索 |
 | `record.ts` | add/check/done/summary：记录、附件、索引和待办联动 |
 | `digest.ts` | 晨报聚合、可选通知和数据快照 |
-| `agent.ts` / `agent-tools.ts` | 观察/规划/执行/校验循环、三色工具策略、默认off |
+| `agent.ts` / `agent-tools.ts` | 观察/规划/执行/校验循环、三色工具策略、默认off；已完成归档保留项目分组及迁移归属 |
 | `data-snapshot.ts` | 显式opt-in且只在独立数据根Git操作，拒绝借源码仓库，失败限域恢复 |
 | `server/test/` | 待办进度/隔离API/配置与安全边界/Markdown净化回归 |
 

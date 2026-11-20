@@ -17,6 +17,7 @@ COPY --from=build /app/server/node_modules ./server/node_modules
 COPY --from=build /app/public/app ./public/app
 COPY package.json LICENSE ./
 COPY scripts/init.mjs ./scripts/init.mjs
+COPY examples ./examples
 COPY docker/entrypoint.sh /usr/local/bin/worknote-entrypoint
 RUN chmod 755 /usr/local/bin/worknote-entrypoint && mkdir /data && chown node:node /data
 USER node

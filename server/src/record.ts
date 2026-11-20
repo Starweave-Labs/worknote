@@ -41,6 +41,7 @@ import {
   type TodoCompletion,
 } from "./todo-format.js";
 import { appendDayCompletion, dayFilePath, type DayEntryInput } from "./daylog-write.js";
+import { updateDayIndex as updateIndex } from "./day-index.js";
 import { createTodo } from "./todo-create.js";
 import { atomicWrite, findTodoLine, markTodoDone, type MarkResult } from "./todo-write.js";
 import { loadWorknoteEnv } from "./notify.js";
@@ -225,65 +226,6 @@ function updateDaySummary(root: string, slugName: string, date: string, summary:
   const text = readFileSync(file, "utf-8").replace(/\r\n/g, "\n");
   const replaced = text.replace(/^>\s*概要[：:].*$/m, `> 概要${COLON}${summary}`);
   if (replaced !== text) atomicWrite(file, replaced);
-}
-
-/** index.md:登记/更新某日摘要(项目节与月份节缺失时创建,日期倒序插入)。 */
-function updateIndex(root: string, slugName: string, projectName: string, systemName: string, date: string, summary: string): void {
-  const file = join(root, "index.md");
-  if (!existsSync(file)) fail("index.md 不存在");
-  let lines = readFileSync(file, "utf-8").replace(/\r\n/g, "\n").split("\n");
-  const link = `- [${date}](projects/${slugName}/daily/${date.slice(0, 7)}/${date}/${date}.md) — ${summary}`;
-
-  // 定位项目节
-  let projIdx = lines.findIndex((l) => l.trim() === `## ${projectName}`);
-  if (projIdx < 0) {
-    // 新项目节追加到文件末尾
-    while (lines.length && lines[lines.length - 1].trim() === "") lines.pop();
-    lines.push("", `## ${projectName}`, "", `- 系统${COLON}${systemName}`, `- 目录${COLON}[projects/${slugName}](projects/${slugName}/)`, "", `### ${date.slice(0, 7)}`, "", link, "");
-    atomicWrite(file, lines.join("\n"));
-    return;
-  }
-  // 项目节范围
-  let projEnd = lines.length;
-  for (let i = projIdx + 1; i < lines.length; i++) {
-    if (lines[i].trim().startsWith("## ")) { projEnd = i; break; }
-  }
-
-  const month = date.slice(0, 7);
-  // 已有该日链接行 → 更新摘要
-  const dayLineIdx = lines.findIndex((l, i) => i > projIdx && i < projEnd && l.trim().startsWith(`- [${date}](`));
-  if (dayLineIdx >= 0) {
-    lines[dayLineIdx] = link;
-    atomicWrite(file, lines.join("\n"));
-    return;
-  }
-  // 定位月份节
-  let monthIdx = -1;
-  for (let i = projIdx + 1; i < projEnd; i++) {
-    const m = lines[i].trim().match(/^### (\d{4}-\d{2})$/);
-    if (m && m[1] === month) { monthIdx = i; break; }
-  }
-  if (monthIdx < 0) {
-    // 新月份节:插在项目节内(月份倒序——比现有月份小则放末尾,否则放最前)
-    let insertAt = projEnd;
-    for (let i = projIdx + 1; i < projEnd; i++) {
-      const m = lines[i].trim().match(/^### (\d{4}-\d{2})$/);
-      if (m && m[1] < month) { insertAt = i; break; }
-    }
-    const block = [`### ${month}`, "", link, ""];
-    lines.splice(insertAt, 0, ...block);
-    atomicWrite(file, lines.join("\n"));
-    return;
-  }
-  // 月份节内:日期倒序插入
-  let insertAt = monthIdx + 1;
-  for (let i = monthIdx + 1; i < projEnd; i++) {
-    const m = lines[i].trim().match(/^- \[(\d{4}-\d{2}-\d{2})\]\(/);
-    if (m && m[1] < date) { insertAt = i; break; }
-    if (lines[i].trim().startsWith("### ") && i > monthIdx + 1) { insertAt = i; break; }
-  }
-  lines.splice(insertAt, 0, link);
-  atomicWrite(file, lines.join("\n"));
 }
 
 /**
